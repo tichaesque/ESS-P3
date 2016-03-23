@@ -1,12 +1,6 @@
 /**
  * Modified version of:
  * HSVColorTracking example
- * Greg Borenstein
- * https://github.com/atduskgreg/opencv-processing-book/blob/master/code/hsv_color_tracking/HSVColorTracking/HSVColorTracking.pde
- *
- * Modified by Jordi Tost @jorditost (color selection)
- *
- * University of Applied Sciences Potsdam, 2014
  */
  
 import gab.opencv.*;
@@ -42,8 +36,8 @@ void setup() {
   opencv = new OpenCV(this, video.width, video.height);
   contours = new ArrayList<Contour>();
   
-  rangeLow = hue-1;
-  rangeHigh = hue+1;
+  rangeLow = hue-3;
+  rangeHigh = hue+3;
    
   goldfish = new Goldfish(0,0);
   xylophone = new Region(0,0,width,height/2, #000000);

@@ -45,12 +45,14 @@ void loop () {
     switch (val) {
       case '0':
         if (!running) {
+          /*
           myMotor->run(FORWARD);
 
           for (i = 0; i < 255; i++) {
             myMotor->setSpeed(i);
             delay(10);
-          }
+          }*/
+          digitalWrite(ledPin, HIGH);
           running = true;
         }
         break;
@@ -59,12 +61,14 @@ void loop () {
       case '1':
         if (running) {
           running = false;
-
+          /*
           myMotor->run(FORWARD);
           for (i = 255; i != 0; i--) {
             myMotor->setSpeed(i);
             delay(10);
-          }
+          }*/
+          digitalWrite(ledPin, LOW);
+          
         }
         break;
     }
