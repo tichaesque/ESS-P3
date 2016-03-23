@@ -12,6 +12,10 @@
 import gab.opencv.*;
 import processing.video.*;
 import java.awt.Rectangle;
+import processing.serial.*;
+
+// The serial port:
+Serial myPort; 
 
 Capture video;
 OpenCV opencv;
@@ -27,20 +31,29 @@ int rangeHigh;
 Goldfish goldfish;
 Region xylophone;
 
+boolean[] inRegion;
+
 void setup() {
   video = new Capture(this, 640, 480);
   video.start();
   
+  myPort = new Serial(this, Serial.list()[2], 9600); 
+  
   opencv = new OpenCV(this, video.width, video.height);
   contours = new ArrayList<Contour>();
   
-  rangeLow = hue-5;
-  rangeHigh = hue+5;
+  rangeLow = hue-1;
+  rangeHigh = hue+1;
    
   goldfish = new Goldfish(0,0);
   xylophone = new Region(0,0,width,height/2, #000000);
   
+  inRegion = new boolean[3];
+  
   size(1280,480);
+  
+  // find ports
+  printArray(Serial.list());
 }
 
 void draw() {
@@ -94,8 +107,18 @@ void draw() {
     fill(255, 0, 0);
     ellipse(goldfish.posX, goldfish.posY, 30, 30); 
     
-    if(xylophone.contains(goldfish.posX, goldfish.posY)) {
-      println("HI");
+    if(!inRegion[0] && xylophone.contains(goldfish.posX, goldfish.posY)) {
+      println("HI "+millis());
+      myPort.write('0');
+      
+      inRegion[0] = true;
+      inRegion[1] = false;
+      inRegion[2] = false;
+    }
+    else if(inRegion[0] && !xylophone.contains(goldfish.posX, goldfish.posY)) {
+      println("BYE "+millis());
+      myPort.write('1');
+      inRegion[0] = false;
     }
   }
 }
