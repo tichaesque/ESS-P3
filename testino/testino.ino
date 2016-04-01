@@ -17,10 +17,9 @@
 #define B_FLAT     9
 #define B_HIGH    10
 #define E_HIGH    11
-#define EB_BLOCK   0
-#define REST      -1
 
-int ledPin = 13;
+#define EB_BLOCK   0
+#define REST      -1 
 
 int ScoreLength = 93;
 int ScorePosition = 0;
@@ -64,26 +63,19 @@ void setup() {
     pinMode(i, OUTPUT);
   }
 
-  pinMode(ledPin, OUTPUT);
-
   Serial.begin(9600);        // connect to the serial port
 
 }
 
 void loop () {
-  uint8_t i;
-
-  if (Serial.available()) {
-    if (ScorePosition == ScoreLength - 1) {
-      //STOP
-    }
-    else {
+  if (Serial.available()) { 
+    if (ScorePosition < ScoreLength) {
       int val = Serial.read();      // read the serial port
 
       // note: sending LOW to the solenoid pulls it down, sending HIGH pulls up
       switch (val) {
         case '0':
-          digitalWrite(ledPin, HIGH);
+          // play drum
           break;
 
         case '1': 
