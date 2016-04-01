@@ -23,15 +23,19 @@ int rangeLow;
 int rangeHigh;
 
 Goldfish goldfish;
-Region xylophone;
+Region toyPiano;
 
-boolean[] inRegion;
+boolean inPiano; 
 
 void setup() {
-  size(1280,480);
+  size(1280,480); 
   String[] cameras = Capture.list();
   
-  video = new Capture(this, 640, 480, cameras[0]); 
+  // use external webcam
+  //video = new Capture(this, 640, 480, cameras[0]);
+  
+  // use built-in webcam (testing purposes only) 
+  video = new Capture(this, 640, 480); 
   video.start();
   
   myPort = new Serial(this, Serial.list()[2], 9600); 
@@ -41,14 +45,14 @@ void setup() {
   
   rangeLow = hue-3;
   rangeHigh = hue+3;
-   
-  goldfish = new Goldfish(0,0);
-  xylophone = new Region(0,0,width,height/2, #000000);
   
-  inRegion = new boolean[3];
+  goldfish = new Goldfish(0,0);
+  toyPiano = new Region(width/2,0,width/4,height, #000000);
+  
+  inPiano = false;
   
   // find ports
-  printArray(Serial.list());
+  //printArray(Serial.list());
 }
 
 void draw() {
@@ -56,7 +60,7 @@ void draw() {
   background(255);
   
   // draw regions
-  xylophone.display();
+  toyPiano.display();
   
   // Read last captured frame
   if (video.available()) {
@@ -102,18 +106,23 @@ void draw() {
     fill(255, 0, 0);
     ellipse(goldfish.posX, goldfish.posY, 30, 30); 
     
-    if(!inRegion[0] && xylophone.contains(goldfish.posX, goldfish.posY)) {
+    if(!inPiano && toyPiano.contains(goldfish.posX, goldfish.posY)) {
       println("HI "+millis());
-      myPort.write('0');
-      
-      inRegion[0] = true;
-      inRegion[1] = false;
-      inRegion[2] = false;
-    }
-    else if(inRegion[0] && !xylophone.contains(goldfish.posX, goldfish.posY)) {
-      println("BYE "+millis());
+      // play toy piano
       myPort.write('1');
-      inRegion[0] = false;
+      // turn off drums
+      // to be added
+      
+      inPiano = true; 
+    }
+    else if(inPiano && !toyPiano.contains(goldfish.posX, goldfish.posY)) {
+      println("BYE "+millis());
+      // turn off toy piano
+      myPort.write('0');
+      // play drums
+      // to be added
+      
+      inPiano = false;
     }
   }
 }
