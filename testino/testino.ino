@@ -19,10 +19,11 @@
 #define E_HIGH    11
 
 #define EB_BLOCK   0
-#define REST      -1 
+#define REST      -1
 
-int ScoreLength = 93;
-int ScorePosition = 0;
+int ScoreLength;
+int ScorePosition;
+boolean playingPiano;
 
 int Score [93][2] = { {B_HIGH, 1000}, {E_LOW, 1000},
   {A_LOW, 1000}, {REST, 500},  {B_HIGH, 125}, {E_HIGH, 375},
@@ -51,7 +52,7 @@ int Score [93][2] = { {B_HIGH, 1000}, {E_LOW, 1000},
   {B_HIGH, 125}, {E_LOW, 375}, {REST, 500}, {EB_BLOCK, 1000},
   {EB_BLOCK, 1000}, {A_LOW, 2000},
   {REST, 1000},
-  {REST, 250}, {B_FLAT, 250},  {A_FLAT, 500}, {G_LOW, 1000}, 
+  {REST, 250}, {B_FLAT, 250},  {A_FLAT, 500}, {G_LOW, 1000},
   {G_LOW, 375}, {A_FLAT, 125},  {B_FLAT, 250}, {REST, 250}, {F_LOW, 2000},
   {REST, 1000},
   {E_FLAT, 375}, {F_LOW, 125},  {G_LOW, 250}, {REST, 250}, {D_FLAT, 2000},
@@ -65,48 +66,53 @@ void setup() {
 
   Serial.begin(9600);        // connect to the serial port
 
+  ScoreLength = 93;
+  ScorePosition = 0;
+  playingPiano = false;
 }
 
 void loop () {
-  if (Serial.available()) { 
-    if (ScorePosition < ScoreLength) {
-      int val = Serial.read();      // read the serial port
-
-      // note: sending LOW to the solenoid pulls it down, sending HIGH pulls up
-      switch (val) {
-        case '0':
-          // play drum
-          break;
-
-        case '1': 
-          int note = Score[ScorePosition][0]; 
-          int duration = Score[ScorePosition][1]; 
-          
-          if (note == REST) {
-            delay(duration);
-          }
-          else if (note == EB_BLOCK) { 
-            digitalWrite(E_LOW, LOW);
-            digitalWrite(B_HIGH, LOW);
-
-            delay(duration);
-
-            digitalWrite(E_LOW, HIGH);
-            digitalWrite(B_HIGH, HIGH);
-
-          }
-          else {
-            digitalWrite(note, LOW);
-            delay(duration);
-            digitalWrite(note, HIGH);
-          }
-
-          ScorePosition++;
-
-          break;
-      }
+  if (Serial.available()) {
+    int val = Serial.read();      // read the serial port
+    if (val == '1') {
+      playingPiano = true;
+    }
+    else if (val == '0') {
+      playingPiano = false;
+    }
+  }
+  
+  if (ScorePosition < ScoreLength) {
+    // note: sending HIGH to the solenoid pulls it down, sending LOW pulls up
+    if (!playingPiano) {
+      // play drum
     }
 
+    else if (playingPiano) {
+      int note = Score[ScorePosition][0];
+      int duration = Score[ScorePosition][1];
+
+      if (note == REST) {
+        delay(duration);
+      }
+      else if (note == EB_BLOCK) {
+        digitalWrite(E_LOW, HIGH);
+        digitalWrite(B_HIGH, HIGH);
+
+        delay(duration);
+
+        digitalWrite(E_LOW, LOW);
+        digitalWrite(B_HIGH, LOW);
+
+      }
+      else {
+        digitalWrite(note, HIGH);
+        delay(duration);
+        digitalWrite(note, LOW);
+      }
+
+      ScorePosition++;
+    }
   }
 
 

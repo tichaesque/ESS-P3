@@ -50,9 +50,7 @@ void setup() {
   toyPiano = new Region(width/2,0,width/4,height, #000000);
   
   inPiano = false;
-  
-  // find ports
-  //printArray(Serial.list());
+   
 }
 
 void draw() {
@@ -106,25 +104,19 @@ void draw() {
     fill(255, 0, 0);
     ellipse(goldfish.posX, goldfish.posY, 30, 30); 
     
-    if(!inPiano && toyPiano.contains(goldfish.posX, goldfish.posY)) {
-      println("HI "+millis());
+    if(!inPiano && toyPiano.contains(goldfish.posX, goldfish.posY)) { 
       // play toy piano
-      myPort.write('1');
-      // turn off drums
-      // to be added
-      
+      myPort.write('1'); 
       inPiano = true; 
     }
-    else if(inPiano && !toyPiano.contains(goldfish.posX, goldfish.posY)) {
-      println("BYE "+millis());
-      // turn off toy piano
-      myPort.write('0');
+    else if(inPiano && !toyPiano.contains(goldfish.posX, goldfish.posY)) { 
       // play drums
-      // to be added
-      
+      myPort.write('0'); 
       inPiano = false;
     }
+    
   }
+  
 }
 
 void mousePressed() {
