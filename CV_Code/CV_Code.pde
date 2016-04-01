@@ -28,7 +28,10 @@ Region xylophone;
 boolean[] inRegion;
 
 void setup() {
-  video = new Capture(this, 640, 480);
+  size(1280,480);
+  String[] cameras = Capture.list();
+  
+  video = new Capture(this, 640, 480, cameras[0]); 
   video.start();
   
   myPort = new Serial(this, Serial.list()[2], 9600); 
@@ -43,8 +46,6 @@ void setup() {
   xylophone = new Region(0,0,width,height/2, #000000);
   
   inRegion = new boolean[3];
-  
-  size(1280,480);
   
   // find ports
   printArray(Serial.list());
