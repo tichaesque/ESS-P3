@@ -73,8 +73,8 @@ int MelodyScore [93][2] = { {B_HIGH, 1000}, {E_LOW, 1000},
 };
 
 
-//int BackgroundScore [4][2] = { {E_LOW, 500},  {B_HIGH, 500}, {E_HIGH, 500}, {B_HIGH, 500} };
-int BackgroundScore [1][2] = { {E_LOW, 2000} };
+int BackgroundScore [4][2] = { {E_LOW, 500},  {B_HIGH, 500}, {E_HIGH, 500}, {B_HIGH, 500} };
+//int BackgroundScore [1][2] = { {E_LOW, 2000} };
 
 // the note being played in the background track and its duration
 int BGNote;
@@ -89,7 +89,7 @@ void setup() {
   Serial.begin(9600);        // connect to the serial port
 
   MelodyLength = 93;
-  BGlength = 1;
+  BGlength = 4;
   ScorePosition = 0;
   BGScorePosition = 0;
   playingMelody = false;
@@ -135,7 +135,7 @@ void MelodyLoop(PTCB tcb) {
     }
     else {
       MelodyVal = LOW;
-    }
+    } 
 
     MelodyNote = MelodyScore[ScorePosition % MelodyLength][0];
     MelodyNoteDuration = MelodyScore[ScorePosition % MelodyLength][1];
