@@ -1,9 +1,6 @@
-/* To use this cd into arduino-serial folder
-    ./arduino-serial -b 9600 -p /dev/cu.usbmodem1411 -s THECHARACTER
-*/
 
-/* IMPORTANT: To turn on a device, a LOW signal has to be sent! NOT HIGH!! */
-
+// using the Arduino-MOS scheduler library
+#include <MOS.h>
 #include <Wire.h> // Enable this line if using Arduino Uno, Mega, etc.
 #include <elapsedMillis.h>
 
@@ -23,9 +20,18 @@
 
 int ScoreLength;
 int ScorePosition;
-boolean playingPiano;
+boolean playingMelody;
 
-int Score [93][2] = { {B_HIGH, 1000}, {E_LOW, 1000},
+int numloops = 0;
+
+float tempo;
+
+int note;
+int duration;
+
+boolean flag;
+
+int MainScore [93][2] = { {B_HIGH, 1000}, {E_LOW, 1000},
   {A_LOW, 1000}, {REST, 500},  {B_HIGH, 125}, {E_HIGH, 375},
   {B_HIGH, 125}, {E_LOW, 250},  {REST, 125}, {B_HIGH, 1000}, {E_LOW, 1000},
   {A_LOW, 1000}, {REST, 500},
@@ -68,52 +74,80 @@ void setup() {
 
   ScoreLength = 93;
   ScorePosition = 0;
-  playingPiano = false;
+  playingMelody = false;
+
+  tempo = 1.0;
+
+  flag = false;
 }
 
 void loop () {
-  if (Serial.available()) {
+
+  MOS_Call(SerialListener);
+  MOS_Call(MelodyLoop);
+
+}
+
+void SerialListener(PTCB tcb) {
+  MOS_Continue(tcb);                    // Continue at previous suspended position
+
+  while (1) {
+    MOS_WaitForCond(tcb, Serial.available());
+
     int val = Serial.read();      // read the serial port
     if (val == '1') {
-      playingPiano = true;
+      playingMelody = true;
     }
     else if (val == '0') {
-      playingPiano = false;
+      playingMelody = false;
     }
+    
   }
-  
-  if (ScorePosition < ScoreLength) {
-    // note: sending HIGH to the solenoid pulls it down, sending LOW pulls up
-    if (!playingPiano) {
-      // play drum
+}
+
+// the loop containing 'Dolphin Dance'
+void MelodyLoop(PTCB tcb) {
+  MOS_Continue(tcb);                    // Continue at previous suspended position
+
+  while (1) {
+    MOS_WaitForCond(tcb, playingMelody);
+
+    note = MainScore[ScorePosition % ScoreLength][0];
+    duration = MainScore[ScorePosition % ScoreLength][1];
+
+    if (note == EB_BLOCK) {
+      digitalWrite(E_LOW, HIGH);
+      digitalWrite(B_HIGH, HIGH);
+
+      MOS_Delay(tcb, duration);
+
+      digitalWrite(E_LOW, LOW);
+      digitalWrite(B_HIGH, LOW);
+
     }
+    else if (note != REST) {
+      digitalWrite(note, HIGH);
 
-    else if (playingPiano) {
-      int note = Score[ScorePosition][0];
-      int duration = Score[ScorePosition][1];
+      MOS_Delay(tcb, duration);
 
-      if (note == REST) {
-        delay(duration);
-      }
-      else if (note == EB_BLOCK) {
-        digitalWrite(E_LOW, HIGH);
-        digitalWrite(B_HIGH, HIGH);
-
-        delay(duration);
-
-        digitalWrite(E_LOW, LOW);
-        digitalWrite(B_HIGH, LOW);
-
-      }
-      else {
-        digitalWrite(note, HIGH);
-        delay(duration);
-        digitalWrite(note, LOW);
-      }
-
+      digitalWrite(note, LOW);
+      ScorePosition++;
+      flag = false;
+    }
+    else {
+      MOS_Delay(tcb, duration);
       ScorePosition++;
     }
+
   }
 
 
 }
+
+// the loop that continuously plays in the background
+/*void DefaultLoop() {
+
+  }
+*/
+
+
