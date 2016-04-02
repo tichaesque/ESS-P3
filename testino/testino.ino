@@ -1,5 +1,5 @@
 
-// using the Arduino-MOS scheduler library
+// !! Requires Arduino-MOS scheduler library
 #include <MOS.h>
 #include <Wire.h> // Enable this line if using Arduino Uno, Mega, etc.
 #include <elapsedMillis.h>
@@ -18,20 +18,27 @@
 #define EB_BLOCK   0
 #define REST      -1
 
-int ScoreLength;
-int ScorePosition;
-boolean playingMelody;
-
 int numloops = 0;
 
-float tempo;
+// the position in the score
+int ScorePosition;
+int BGScorePosition;
 
-int note;
-int duration;
+// the length of the Melody track
+int MelodyLength;
+boolean playingMelody;
 
-boolean flag;
+// checks if melody track is synced with background track
+boolean MelodySynced;
 
-int MainScore [93][2] = { {B_HIGH, 1000}, {E_LOW, 1000},
+// when this value is LOW, the Melody track is muted
+int MelodyVal;
+
+// the note being played in the melody track and its duration
+int MelodyNote;
+int MelodyNoteDuration;
+
+int MelodyScore [93][2] = { {B_HIGH, 1000}, {E_LOW, 1000},
   {A_LOW, 1000}, {REST, 500},  {B_HIGH, 125}, {E_HIGH, 375},
   {B_HIGH, 125}, {E_LOW, 250},  {REST, 125}, {B_HIGH, 1000}, {E_LOW, 1000},
   {A_LOW, 1000}, {REST, 500},
@@ -65,6 +72,15 @@ int MainScore [93][2] = { {B_HIGH, 1000}, {E_LOW, 1000},
   {E_FLAT, 500}
 };
 
+
+//int BackgroundScore [4][2] = { {E_LOW, 500},  {B_HIGH, 500}, {E_HIGH, 500}, {B_HIGH, 500} };
+int BackgroundScore [1][2] = { {E_LOW, 2000} };
+
+// the note being played in the background track and its duration
+int BGNote;
+int BGNoteDuration;
+int BGlength;
+
 void setup() {
   for (int i = 2; i <= 11; i++) {
     pinMode(i, OUTPUT);
@@ -72,19 +88,21 @@ void setup() {
 
   Serial.begin(9600);        // connect to the serial port
 
-  ScoreLength = 93;
+  MelodyLength = 93;
+  BGlength = 1;
   ScorePosition = 0;
+  BGScorePosition = 0;
   playingMelody = false;
+  MelodySynced = false;
+  MelodyVal = LOW;
 
-  tempo = 1.0;
-
-  flag = false;
 }
 
 void loop () {
 
   MOS_Call(SerialListener);
   MOS_Call(MelodyLoop);
+  MOS_Call(BackgroundLoop);
 
 }
 
@@ -101,7 +119,7 @@ void SerialListener(PTCB tcb) {
     else if (val == '0') {
       playingMelody = false;
     }
-    
+
   }
 }
 
@@ -110,32 +128,38 @@ void MelodyLoop(PTCB tcb) {
   MOS_Continue(tcb);                    // Continue at previous suspended position
 
   while (1) {
-    MOS_WaitForCond(tcb, playingMelody);
+    MOS_WaitForCond(tcb, MelodySynced);
 
-    note = MainScore[ScorePosition % ScoreLength][0];
-    duration = MainScore[ScorePosition % ScoreLength][1];
+    if (playingMelody) {
+      MelodyVal = HIGH;
+    }
+    else {
+      MelodyVal = LOW;
+    }
 
-    if (note == EB_BLOCK) {
-      digitalWrite(E_LOW, HIGH);
-      digitalWrite(B_HIGH, HIGH);
+    MelodyNote = MelodyScore[ScorePosition % MelodyLength][0];
+    MelodyNoteDuration = MelodyScore[ScorePosition % MelodyLength][1];
 
-      MOS_Delay(tcb, duration);
+    if (MelodyNote == EB_BLOCK) {
+      digitalWrite(E_LOW, MelodyVal);
+      digitalWrite(B_HIGH, MelodyVal);
+
+      MOS_Delay(tcb, MelodyNoteDuration);
 
       digitalWrite(E_LOW, LOW);
       digitalWrite(B_HIGH, LOW);
-
-    }
-    else if (note != REST) {
-      digitalWrite(note, HIGH);
-
-      MOS_Delay(tcb, duration);
-
-      digitalWrite(note, LOW);
       ScorePosition++;
-      flag = false;
+    }
+    else if (MelodyNote != REST) {
+      digitalWrite(MelodyNote, MelodyVal);
+
+      MOS_Delay(tcb, MelodyNoteDuration);
+
+      digitalWrite(MelodyNote, LOW);
+      ScorePosition++;
     }
     else {
-      MOS_Delay(tcb, duration);
+      MOS_Delay(tcb, MelodyNoteDuration);
       ScorePosition++;
     }
 
@@ -145,9 +169,25 @@ void MelodyLoop(PTCB tcb) {
 }
 
 // the loop that continuously plays in the background
-/*void DefaultLoop() {
+void BackgroundLoop(PTCB tcb) {
+  MOS_Continue(tcb);
 
+  while (1) {
+    if (playingMelody && BGScorePosition % BGlength == 0) {
+      MelodySynced = true;
+    }
+
+    BGNote = BackgroundScore[BGScorePosition % BGlength][0];
+    BGNoteDuration = BackgroundScore[BGScorePosition % BGlength][1];
+
+    digitalWrite(BGNote, HIGH);
+    MOS_Delay(tcb, BGNoteDuration-50);
+    digitalWrite(BGNote, LOW);
+    MOS_Delay(tcb, 50);
+
+    BGScorePosition++;
   }
-*/
+}
+
 
 
