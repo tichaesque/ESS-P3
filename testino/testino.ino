@@ -19,8 +19,7 @@
 #define G2_B2   1012
 #define REST    -1
 
-int numloops = 0;
- 
+//int numloops = 0;
 
 int Loop1 [8][2] = { {E1, 500}, {B1, 500}, {E2, 500}, {B1, 500},
   {D1, 500}, {A1, 500}, {D2, 500}, {A1, 500},
@@ -34,7 +33,7 @@ int Loop1Val = HIGH;
 int Loop1Note;
 int Loop1Duration;
 
-int Loop2 [5][2] = { {B1, 1000}, {E2, 950}, {REST, 50},
+int Loop2 [5][2] = { {B1, 1000}, {E2, 850}, {REST, 150},
   {E2, 1000}, {G2_B2, 1000},
 
 };
@@ -82,7 +81,6 @@ void setup() {
 }
 
 void loop () {
-
   MOS_Call(SerialListener);
 
   MOS_Call(PlayLoop1);
@@ -127,6 +125,13 @@ void SerialListener(PTCB tcb) {
         PlayingLoop2 = false;
         PlayingLoop3 = false;
         PlayingLoop4 = true; 
+        break;
+
+      case '5':
+        PlayingLoop1 = false;
+        PlayingLoop2 = false;
+        PlayingLoop3 = false;
+        PlayingLoop4 = false; 
         break;
     }
 

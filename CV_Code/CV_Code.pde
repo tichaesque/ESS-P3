@@ -16,7 +16,8 @@ OpenCV opencv;
 PImage src, colorFilteredImage;
 ArrayList<Contour> contours;
 
-int hue = 177;
+//int hue = 177;
+int hue = 0; 
 
 // <1> Set the range of Hue values for our filter
 int rangeLow;
@@ -33,12 +34,18 @@ boolean inLoop2;
 boolean inLoop3; 
 boolean inLoop4; 
 
+int startMinute; 
+
+boolean finished = false;
+
 void setup() {
   size(1280, 480); 
   String[] cameras = Capture.list();
+  //printArray(cameras); 
+  //printArray(Serial.list()); 
 
   // use external webcam
-  video = new Capture(this, 640, 480, cameras[0]);
+  video = new Capture(this, 640, 480, cameras[15]);
 
   // use built-in webcam (testing purposes only) 
   //video = new Capture(this, 640, 480); 
@@ -53,16 +60,18 @@ void setup() {
   rangeHigh = hue+3;
 
   goldfish = new Goldfish(0, 0);
-  
+
   Loop1 = new Region(width/2, 0, width/4, height/2, #000000);
   Loop2 = new Region(width*0.75, 0, width/4, height/2, #FFFFFF);
   Loop3 = new Region(width/2, height/2, width/4, height/2, #00FF00);
   Loop4 = new Region(width*0.75, height/2, width/4, height/2, #0000FF);
-  
+
   inLoop1 = false;
   inLoop2 = false;
   inLoop3 = false;
   inLoop4 = false;
+
+  startMinute = minute();
 }
 
 void draw() {
@@ -119,34 +128,42 @@ void draw() {
     fill(255, 0, 0);
     ellipse(goldfish.posX, goldfish.posY, 30, 30); 
 
-    if (!inLoop1 && Loop1.contains(goldfish.posX, goldfish.posY)) { 
-      // play toy piano
-      myPort.write('1'); 
-      inLoop1 = true;
-      inLoop2 = false;
-      inLoop3 = false;
-      inLoop4 = false;
-    } else if (!inLoop2 && Loop2.contains(goldfish.posX, goldfish.posY)) { 
-      // play toy piano
-      myPort.write('2'); 
-      inLoop1 = false;
-      inLoop2 = true;
-      inLoop3 = false;
-      inLoop4 = false;
-    } else if (!inLoop3 && Loop3.contains(goldfish.posX, goldfish.posY)) { 
-      // play toy piano
-      myPort.write('3'); 
-      inLoop1 = false;
-      inLoop2 = false;
-      inLoop3 = true;
-      inLoop4 = false;
-    } else if (!inLoop4 && Loop4.contains(goldfish.posX, goldfish.posY)) { 
-      // play toy piano
-      myPort.write('4'); 
-      inLoop1 = false;
-      inLoop2 = false;
-      inLoop3 = false;
-      inLoop4 = true;
+    if (!finished) {
+      if (!inLoop1 && Loop1.contains(goldfish.posX, goldfish.posY)) { 
+        // play toy piano
+        myPort.write('1'); 
+        inLoop1 = true;
+        inLoop2 = false;
+        inLoop3 = false;
+        inLoop4 = false;
+      } else if (!inLoop2 && Loop2.contains(goldfish.posX, goldfish.posY)) { 
+        // play toy piano
+        myPort.write('2'); 
+        inLoop1 = false;
+        inLoop2 = true;
+        inLoop3 = false;
+        inLoop4 = false;
+      } else if (!inLoop3 && Loop3.contains(goldfish.posX, goldfish.posY)) { 
+        // play toy piano
+        myPort.write('3'); 
+        inLoop1 = false;
+        inLoop2 = false;
+        inLoop3 = true;
+        inLoop4 = false;
+      } else if (!inLoop4 && Loop4.contains(goldfish.posX, goldfish.posY)) { 
+        // play toy piano
+        myPort.write('4'); 
+        inLoop1 = false;
+        inLoop2 = false;
+        inLoop3 = false;
+        inLoop4 = true;
+      }
+
+      if (minute() - startMinute >= 2) { 
+        myPort.write('5'); 
+
+        finished = true;
+      }
     }
   }
 }
