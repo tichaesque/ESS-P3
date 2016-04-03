@@ -25,8 +25,7 @@ int Loop1 [8][2] = { {E1, 500}, {B1, 500}, {E2, 500}, {B1, 500},
   {D1, 500}, {A1, 500}, {D2, 500}, {A1, 500},
 
 };
-boolean PlayingLoop1 = true;
-boolean Loop1Synced = true;
+boolean PlayingLoop1 = true; 
 int Loop1Length = 8;
 int Loop1Position = 0;
 int Loop1Val = HIGH;
@@ -142,7 +141,7 @@ void PlayLoop2(PTCB tcb) {
   MOS_Continue(tcb);                    // Continue at previous suspended position
 
   while (1) {
-    MOS_WaitForCond(tcb, Loop2Synced);
+    //MOS_WaitForCond(tcb, Loop2Synced);
 
     Loop2Note = Loop2[Loop2Position % Loop2Length][0];
     Loop2Duration = Loop2[Loop2Position % Loop2Length][1];
@@ -177,7 +176,7 @@ void PlayLoop3(PTCB tcb) {
   MOS_Continue(tcb);                    // Continue at previous suspended position
 
   while (1) {
-    MOS_WaitForCond(tcb, Loop3Synced);
+    //MOS_WaitForCond(tcb, Loop3Synced);
 
     Loop3Note = Loop3[Loop3Position % Loop3Length][0];
     Loop3Duration = Loop3[Loop3Position % Loop3Length][1];
@@ -202,7 +201,7 @@ void PlayLoop4(PTCB tcb) {
   MOS_Continue(tcb);                    // Continue at previous suspended position
 
   while (1) {
-    MOS_WaitForCond(tcb, Loop4Synced);
+    //MOS_WaitForCond(tcb, Loop4Synced);
 
     Loop4Note = Loop4[Loop4Position % Loop4Length][0];
     Loop4Duration = Loop4[Loop4Position % Loop4Length][1];
@@ -244,13 +243,13 @@ void PlayLoop1(PTCB tcb) {
     Loop1Note = Loop1[Loop1Position % Loop1Length][0];
     Loop1Duration = Loop1[Loop1Position % Loop1Length][1];
 
-    if (PlayingLoop2 && Loop1Position % 4 == 0) {
+    if (PlayingLoop2 && Loop1Position % 8 == 0) {
       Loop2Synced = true;
     }
-    if (PlayingLoop3 && Loop1Position % 4 == 0) {
+    if (PlayingLoop3 && Loop1Position % 8 == 0) {
       Loop3Synced = true;
     }
-    if (PlayingLoop4 && Loop1Position % 4 == 0) {
+    if (PlayingLoop4 && Loop1Position % 8 == 0) {
       Loop4Synced = true;
     }
 

@@ -16,8 +16,8 @@ OpenCV opencv;
 PImage src, colorFilteredImage;
 ArrayList<Contour> contours;
 
-//int hue = 177;
-int hue = 0; 
+int hue = 177;
+//int hue = 0; 
 
 // <1> Set the range of Hue values for our filter
 int rangeLow;
@@ -83,6 +83,8 @@ void draw() {
   Loop2.display();
   Loop3.display();
   Loop4.display();
+  
+  
 
   // Read last captured frame
   if (video.available()) {
@@ -159,13 +161,20 @@ void draw() {
         inLoop4 = true;
       }
 
-      if (minute() - startMinute >= 2) { 
+      if (minute() - startMinute >= 3 || minute() - startMinute < 0) { 
         myPort.write('5'); 
 
         finished = true;
       }
     }
   }
+  
+  pushMatrix();
+  translate(width*0.6, 30); 
+  fill(255);
+  textSize(32);
+  text(minute()-startMinute + ":" + second(), 0,0); 
+  popMatrix(); 
 }
 
 void mousePressed() {
