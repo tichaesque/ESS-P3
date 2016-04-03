@@ -4,105 +4,100 @@
 #include <Wire.h> // Enable this line if using Arduino Uno, Mega, etc.
 #include <elapsedMillis.h>
 
-#define D_FLAT     2
-#define E_FLAT     3
-#define E_LOW      4
-#define F_LOW      5
-#define G_LOW      6
-#define A_FLAT     7
-#define A_LOW      8
-#define B_FLAT     9
-#define B_HIGH    10
-#define E_HIGH    11
+#define D1     2
+#define E1     3
+#define G1     4
+#define A1     5
+#define B1     6
+#define C2     7
+#define D2     8
+#define E2     9
+#define G2    10
+#define A2    11
+#define B2    12
 
-#define EB_BLOCK   0
-#define REST      -1
+#define G2_B2   1012
+#define REST    -1
 
 int numloops = 0;
 
-// the position in the score
-int ScorePosition;
-int BGScorePosition;
+int *RefLoopPosition;
 
-// the length of the Melody track
-int MelodyLength;
-boolean playingMelody;
+// # of notes in measure
+int RefLoopLength;
 
-// checks if melody track is synced with background track
-boolean MelodySynced;
+int Loop1 [8][2] = { {E1, 500}, {B1, 500}, {E2, 500}, {B1, 500},
+  {D1, 500}, {A1, 500}, {D2, 500}, {A1, 500},
 
-// when this value is LOW, the Melody track is muted
-int MelodyVal;
-
-// the note being played in the melody track and its duration
-int MelodyNote;
-int MelodyNoteDuration;
-
-int MelodyScore [93][2] = { {B_HIGH, 1000}, {E_LOW, 1000},
-  {A_LOW, 1000}, {REST, 500},  {B_HIGH, 125}, {E_HIGH, 375},
-  {B_HIGH, 125}, {E_LOW, 250},  {REST, 125}, {B_HIGH, 1000}, {E_LOW, 1000},
-  {A_LOW, 1000}, {REST, 500},
-  {REST, 2000},
-  {B_HIGH, 1000}, {E_LOW, 1000},
-  {A_LOW, 1000}, {REST, 500},  {B_HIGH, 125}, {E_HIGH, 375},
-  {B_HIGH, 125}, {E_LOW, 250},  {REST, 125}, {B_HIGH, 1000}, {E_LOW, 1000},
-  {A_LOW, 1000}, {REST, 500},
-  {REST, 250}, {B_FLAT, 250},  {A_FLAT, 500}, {G_LOW, 1000},
-  {G_LOW, 375}, {A_FLAT, 125},  {B_FLAT, 250}, {REST, 250}, {F_LOW, 2000},
-  {REST, 1000},
-  {E_FLAT, 375}, {F_LOW, 125},  {G_LOW, 250}, {REST, 250}, {D_FLAT, 2000},
-  {REST, 500}, {B_HIGH, 1000},
-  {E_LOW, 1000}, {A_LOW, 1000},
-  {REST, 500}, {B_HIGH, 1000},
-  {E_LOW, 1000}, {A_LOW, 1000},
-  {A_FLAT, 1000}, {G_LOW, 1000},
-  {G_LOW, 375}, {A_FLAT, 125},  {B_FLAT, 250}, {REST, 250}, {F_LOW, 2000},
-  {REST, 1000},
-  {E_FLAT, 375}, {F_LOW, 125},  {G_LOW, 250}, {REST, 250}, {D_FLAT, 2000},
-  {REST, 1000},
-  {EB_BLOCK, 1000}, {EB_BLOCK, 1000},
-  {A_LOW, 1000}, {REST, 500},  {B_HIGH, 125}, {E_HIGH, 375},
-  {B_HIGH, 125}, {E_LOW, 375}, {REST, 500}, {EB_BLOCK, 1000},
-  {EB_BLOCK, 1000}, {A_LOW, 2000},
-  {REST, 1000},
-  {REST, 250}, {B_FLAT, 250},  {A_FLAT, 500}, {G_LOW, 1000},
-  {G_LOW, 375}, {A_FLAT, 125},  {B_FLAT, 250}, {REST, 250}, {F_LOW, 2000},
-  {REST, 1000},
-  {E_FLAT, 375}, {F_LOW, 125},  {G_LOW, 250}, {REST, 250}, {D_FLAT, 2000},
-  {E_FLAT, 500}
 };
+boolean PlayingLoop1 = true;
+boolean Loop1Synced = true;
+int Loop1Length = 8;
+int Loop1Position = 0;
+int Loop1Val = HIGH;
+int Loop1Note;
+int Loop1Duration;
 
+int Loop2 [5][2] = { {B1, 1000}, {E2, 950}, {REST, 50},
+  {E2, 1000}, {G2_B2, 1000},
 
-int BackgroundScore [4][2] = { {E_LOW, 500},  {B_HIGH, 500}, {E_HIGH, 500}, {B_HIGH, 500} };
-//int BackgroundScore [1][2] = { {E_LOW, 2000} };
+};
+boolean PlayingLoop2 = false;
+boolean Loop2Synced = false;
+int Loop2Length = 5;
+int Loop2Position = 0;
+int Loop2Val = LOW;
+int Loop2Note;
+int Loop2Duration;
 
-// the note being played in the background track and its duration
-int BGNote;
-int BGNoteDuration;
-int BGlength;
+int Loop3 [24][2] = { {E1, 125}, {B1, 375}, {REST, 500}, {E2, 125}, {B1, 375}, {REST, 500},
+  {D2, 125}, {A1, 375}, {REST, 500}, {A1, 125}, {D1, 375}, {REST, 500},
+  {E1, 125}, {B1, 375}, {REST, 500}, {E2, 125}, {B1, 375}, {REST, 500},
+  {D2, 125}, {A1, 375}, {REST, 500}, {C2, 125}, {G1, 375}, {REST, 500},
+
+};
+boolean PlayingLoop3 = false;
+boolean Loop3Synced = false;
+int Loop3Length = 24;
+int Loop3Position = 0;
+int Loop3Val = LOW;
+int Loop3Note;
+int Loop3Duration;
+
+int Loop4 [8][2] = { {E1, 500}, {G2_B2, 750}, {E1, 250}, {D2, 500},
+  {E1, 500}, {G2_B2, 750}, {D1, 250}, {A2, 500},
+
+};
+boolean PlayingLoop4 = false;
+boolean Loop4Synced = false;
+int Loop4Length = 8;
+int Loop4Position = 0;
+int Loop4Val = LOW;
+int Loop4Note;
+int Loop4Duration;
 
 void setup() {
-  for (int i = 2; i <= 11; i++) {
+  for (int i = 2; i <= 12; i++) {
     pinMode(i, OUTPUT);
   }
 
   Serial.begin(9600);        // connect to the serial port
 
-  MelodyLength = 93;
-  BGlength = 4;
-  ScorePosition = 0;
-  BGScorePosition = 0;
-  playingMelody = false;
-  MelodySynced = false;
-  MelodyVal = LOW;
+  RefLoopPosition = (int *) malloc(sizeof(int));
 
+  RefLoopPosition = &Loop1Position;
+  RefLoopLength = 8;
 }
 
 void loop () {
 
   MOS_Call(SerialListener);
-  MOS_Call(MelodyLoop);
-  MOS_Call(BackgroundLoop);
+  //MOS_Call(UpdateRefLoop);
+
+  MOS_Call(PlayLoop1);
+  MOS_Call(PlayLoop2);
+  MOS_Call(PlayLoop3);
+  MOS_Call(PlayLoop4);
 
 }
 
@@ -113,81 +108,237 @@ void SerialListener(PTCB tcb) {
     MOS_WaitForCond(tcb, Serial.available());
 
     int val = Serial.read();      // read the serial port
-    if (val == '1') {
-      playingMelody = true;
-    }
-    else if (val == '0') {
-      playingMelody = false;
+
+    switch (val) {
+      case '1':
+        PlayingLoop1 = true;
+        PlayingLoop2 = false;
+        PlayingLoop3 = false;
+        PlayingLoop4 = false;
+
+        RefLoopPosition = &Loop1Position;
+        RefLoopLength = Loop1Length;
+        break;
+
+      case '2':
+        PlayingLoop1 = false;
+        PlayingLoop2 = true;
+        PlayingLoop3 = false;
+        PlayingLoop4 = false;
+
+        RefLoopPosition = &Loop2Position;
+        RefLoopLength = Loop2Length;
+        break;
+
+      case '3':
+        PlayingLoop1 = false;
+        PlayingLoop2 = false;
+        PlayingLoop3 = true;
+        PlayingLoop4 = false;
+
+        RefLoopPosition = &Loop3Position;
+        RefLoopLength = Loop3Length;
+        break;
+
+      case '4':
+        PlayingLoop1 = false;
+        PlayingLoop2 = false;
+        PlayingLoop3 = false;
+        PlayingLoop4 = true;
+
+        RefLoopPosition = &Loop4Position;
+        RefLoopLength = Loop4Length;
+        break;
     }
 
   }
 }
 
-// the loop containing 'Dolphin Dance'
-void MelodyLoop(PTCB tcb) {
+void PlayLoop2(PTCB tcb) {
   MOS_Continue(tcb);                    // Continue at previous suspended position
 
   while (1) {
-    MOS_WaitForCond(tcb, MelodySynced);
+    MOS_WaitForCond(tcb, Loop2Synced);
 
-    if (playingMelody) {
-      MelodyVal = HIGH;
+    /*
+        if (PlayingLoop2) {
+          Loop2Val = HIGH;
+        }
+        else {
+          Loop2Val = LOW;
+        }
+    */
+    Loop2Note = Loop2[Loop2Position % Loop2Length][0];
+    Loop2Duration = Loop2[Loop2Position % Loop2Length][1];
+
+    if (Loop2Note == G2_B2) {
+      if (PlayingLoop2) {
+        digitalWrite(G2, HIGH);
+        digitalWrite(B2, HIGH);
+        MOS_Delay(tcb, Loop2Duration);
+
+        digitalWrite(G2, LOW);
+        digitalWrite(B2, LOW);
+      }
+      else {
+        MOS_Delay(tcb, Loop2Duration);
+      }
+      //digitalWrite(G2, Loop2Val);
+      //digitalWrite(B2, Loop2Val);
+
+
+      Loop2Position++;
+    }
+    else if (Loop2Note != REST) {
+      if (PlayingLoop2) {
+        digitalWrite(Loop2Note, HIGH);
+        MOS_Delay(tcb, Loop2Duration);
+
+        digitalWrite(Loop2Note, LOW);
+      }
+      else {
+        MOS_Delay(tcb, Loop2Duration);
+      }
+      //digitalWrite(Loop2Note, Loop2Val);
+
+
+      Loop2Position++;
     }
     else {
-      MelodyVal = LOW;
-    } 
-
-    MelodyNote = MelodyScore[ScorePosition % MelodyLength][0];
-    MelodyNoteDuration = MelodyScore[ScorePosition % MelodyLength][1];
-
-    if (MelodyNote == EB_BLOCK) {
-      digitalWrite(E_LOW, MelodyVal);
-      digitalWrite(B_HIGH, MelodyVal);
-
-      MOS_Delay(tcb, MelodyNoteDuration);
-
-      digitalWrite(E_LOW, LOW);
-      digitalWrite(B_HIGH, LOW);
-      ScorePosition++;
-    }
-    else if (MelodyNote != REST) {
-      digitalWrite(MelodyNote, MelodyVal);
-
-      MOS_Delay(tcb, MelodyNoteDuration);
-
-      digitalWrite(MelodyNote, LOW);
-      ScorePosition++;
-    }
-    else {
-      MOS_Delay(tcb, MelodyNoteDuration);
-      ScorePosition++;
+      MOS_Delay(tcb, Loop2Duration);
+      Loop2Position++;
     }
 
   }
-
-
 }
 
-// the loop that continuously plays in the background
-void BackgroundLoop(PTCB tcb) {
+void PlayLoop3(PTCB tcb) {
+  MOS_Continue(tcb);                    // Continue at previous suspended position
+
+  while (1) {
+    MOS_WaitForCond(tcb, Loop3Synced);
+
+    Loop3Note = Loop3[Loop3Position % Loop3Length][0];
+    Loop3Duration = Loop3[Loop3Position % Loop3Length][1];
+
+    if (Loop3Note != REST) {
+      if (PlayingLoop3) {
+        digitalWrite(Loop3Note, HIGH);
+        MOS_Delay(tcb, Loop3Duration);
+
+        digitalWrite(Loop3Note, LOW);
+      }
+      else {
+        MOS_Delay(tcb, Loop3Duration);
+      }
+      //digitalWrite(Loop3Note, Loop3Val);
+
+
+      Loop3Position++;
+    }
+    else {
+      MOS_Delay(tcb, Loop3Duration);
+      Loop3Position++;
+    }
+
+  }
+}
+
+void PlayLoop4(PTCB tcb) {
+  MOS_Continue(tcb);                    // Continue at previous suspended position
+
+  while (1) {
+    MOS_WaitForCond(tcb, Loop4Synced);
+
+    /*
+        if (PlayingLoop4) {
+          Loop4Val = HIGH;
+        }
+        else {
+          Loop4Val = LOW;
+        }*/
+
+    Loop4Note = Loop4[Loop4Position % Loop4Length][0];
+    Loop4Duration = Loop4[Loop4Position % Loop4Length][1];
+
+    if (Loop4Note == G2_B2) {
+      if (PlayingLoop4) {
+        digitalWrite(G2, HIGH);
+        digitalWrite(B2, HIGH);
+
+        MOS_Delay(tcb, Loop4Duration);
+
+        digitalWrite(G2, LOW);
+        digitalWrite(B2, LOW);
+      }
+      else {
+        MOS_Delay(tcb, Loop4Duration);
+      }
+      //digitalWrite(G2, Loop4Val);
+      //digitalWrite(B2, Loop4Val);
+
+
+
+      Loop4Position++;
+    }
+    else if (Loop4Note != REST) {
+      if (PlayingLoop4) {
+        digitalWrite(Loop4Note, HIGH);
+        MOS_Delay(tcb, Loop4Duration);
+
+        digitalWrite(Loop4Note, LOW);
+      }
+      else {
+        MOS_Delay(tcb, Loop4Duration);
+      }
+      //digitalWrite(Loop4Note, Loop4Val);
+
+
+      Loop4Position++;
+    }
+    else {
+      MOS_Delay(tcb, Loop4Duration);
+      Loop4Position++;
+    }
+
+  }
+}
+
+// Special loop that also serves as a metronome
+void PlayLoop1(PTCB tcb) {
   MOS_Continue(tcb);
 
   while (1) {
-    if (playingMelody && BGScorePosition % BGlength == 0) {
-      MelodySynced = true;
+
+    if (PlayingLoop2 && Loop1Position % 4 == 0) {
+      Loop2Synced = true;
+    }
+    if (PlayingLoop3 && Loop1Position % 4 == 0) {
+      Loop3Synced = true;
+    }
+    if (PlayingLoop4 && Loop1Position % 4 == 0) {
+      Loop4Synced = true;
     }
 
-    BGNote = BackgroundScore[BGScorePosition % BGlength][0];
-    BGNoteDuration = BackgroundScore[BGScorePosition % BGlength][1];
+    Loop1Note = Loop1[Loop1Position % Loop1Length][0];
+    Loop1Duration = Loop1[Loop1Position % Loop1Length][1];
 
-    digitalWrite(BGNote, HIGH);
-    MOS_Delay(tcb, BGNoteDuration-50);
-    digitalWrite(BGNote, LOW);
-    MOS_Delay(tcb, 50);
+    if (PlayingLoop1) {
+      digitalWrite(Loop1Note, HIGH);
+      MOS_Delay(tcb, Loop1Duration);
+      digitalWrite(Loop1Note, LOW);
+    }
+    else {
+      MOS_Delay(tcb, Loop1Duration);
+    }
+    //digitalWrite(Loop1Note, Loop1Val);
+    //MOS_Delay(tcb, Loop1Duration);
+    //digitalWrite(Loop1Note, LOW);
 
-    BGScorePosition++;
+    Loop1Position++;
   }
 }
+
 
 
 

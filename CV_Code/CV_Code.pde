@@ -22,10 +22,16 @@ int hue = 177;
 int rangeLow;
 int rangeHigh;
 
-Goldfish goldfish;
-Region toyPiano;
+Goldfish goldfish; 
+Region Loop1;
+Region Loop2;
+Region Loop3;
+Region Loop4;
 
-boolean inPiano; 
+boolean inLoop1;
+boolean inLoop2; 
+boolean inLoop3; 
+boolean inLoop4; 
 
 void setup() {
   size(1280, 480); 
@@ -47,10 +53,16 @@ void setup() {
   rangeHigh = hue+3;
 
   goldfish = new Goldfish(0, 0);
-  //toyPiano = new Region(width/2, 0, width/4, height, #000000);
-  toyPiano = new Region(0, 0, width, height/2, #000000);
-
-  inPiano = false;
+  
+  Loop1 = new Region(width/2, 0, width/4, height/2, #000000);
+  Loop2 = new Region(width*0.75, 0, width/4, height/2, #FFFFFF);
+  Loop3 = new Region(width/2, height/2, width/4, height/2, #00FF00);
+  Loop4 = new Region(width*0.75, height/2, width/4, height/2, #0000FF);
+  
+  inLoop1 = false;
+  inLoop2 = false;
+  inLoop3 = false;
+  inLoop4 = false;
 }
 
 void draw() {
@@ -58,7 +70,10 @@ void draw() {
   background(255);
 
   // draw regions
-  toyPiano.display();
+  Loop1.display();
+  Loop2.display();
+  Loop3.display();
+  Loop4.display();
 
   // Read last captured frame
   if (video.available()) {
@@ -104,14 +119,34 @@ void draw() {
     fill(255, 0, 0);
     ellipse(goldfish.posX, goldfish.posY, 30, 30); 
 
-    if (!inPiano && toyPiano.contains(goldfish.posX, goldfish.posY)) { 
+    if (!inLoop1 && Loop1.contains(goldfish.posX, goldfish.posY)) { 
       // play toy piano
       myPort.write('1'); 
-      inPiano = true;
-    } else if (inPiano && !toyPiano.contains(goldfish.posX, goldfish.posY)) { 
-      // play drums
-      myPort.write('0'); 
-      inPiano = false;
+      inLoop1 = true;
+      inLoop2 = false;
+      inLoop3 = false;
+      inLoop4 = false;
+    } else if (!inLoop2 && Loop2.contains(goldfish.posX, goldfish.posY)) { 
+      // play toy piano
+      myPort.write('2'); 
+      inLoop1 = false;
+      inLoop2 = true;
+      inLoop3 = false;
+      inLoop4 = false;
+    } else if (!inLoop3 && Loop3.contains(goldfish.posX, goldfish.posY)) { 
+      // play toy piano
+      myPort.write('3'); 
+      inLoop1 = false;
+      inLoop2 = false;
+      inLoop3 = true;
+      inLoop4 = false;
+    } else if (!inLoop4 && Loop4.contains(goldfish.posX, goldfish.posY)) { 
+      // play toy piano
+      myPort.write('4'); 
+      inLoop1 = false;
+      inLoop2 = false;
+      inLoop3 = false;
+      inLoop4 = true;
     }
   }
 }
