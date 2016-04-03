@@ -20,11 +20,7 @@
 #define REST    -1
 
 int numloops = 0;
-
-int *RefLoopPosition;
-
-// # of notes in measure
-int RefLoopLength;
+ 
 
 int Loop1 [8][2] = { {E1, 500}, {B1, 500}, {E2, 500}, {B1, 500},
   {D1, 500}, {A1, 500}, {D2, 500}, {A1, 500},
@@ -83,16 +79,11 @@ void setup() {
 
   Serial.begin(9600);        // connect to the serial port
 
-  RefLoopPosition = (int *) malloc(sizeof(int));
-
-  RefLoopPosition = &Loop1Position;
-  RefLoopLength = 8;
 }
 
 void loop () {
 
   MOS_Call(SerialListener);
-  //MOS_Call(UpdateRefLoop);
 
   MOS_Call(PlayLoop1);
   MOS_Call(PlayLoop2);
@@ -114,40 +105,28 @@ void SerialListener(PTCB tcb) {
         PlayingLoop1 = true;
         PlayingLoop2 = false;
         PlayingLoop3 = false;
-        PlayingLoop4 = false;
-
-        RefLoopPosition = &Loop1Position;
-        RefLoopLength = Loop1Length;
+        PlayingLoop4 = false; 
         break;
 
       case '2':
         PlayingLoop1 = false;
         PlayingLoop2 = true;
         PlayingLoop3 = false;
-        PlayingLoop4 = false;
-
-        RefLoopPosition = &Loop2Position;
-        RefLoopLength = Loop2Length;
+        PlayingLoop4 = false; 
         break;
 
       case '3':
         PlayingLoop1 = false;
         PlayingLoop2 = false;
         PlayingLoop3 = true;
-        PlayingLoop4 = false;
-
-        RefLoopPosition = &Loop3Position;
-        RefLoopLength = Loop3Length;
+        PlayingLoop4 = false; 
         break;
 
       case '4':
         PlayingLoop1 = false;
         PlayingLoop2 = false;
         PlayingLoop3 = false;
-        PlayingLoop4 = true;
-
-        RefLoopPosition = &Loop4Position;
-        RefLoopLength = Loop4Length;
+        PlayingLoop4 = true; 
         break;
     }
 
@@ -160,55 +139,32 @@ void PlayLoop2(PTCB tcb) {
   while (1) {
     MOS_WaitForCond(tcb, Loop2Synced);
 
-    /*
-        if (PlayingLoop2) {
-          Loop2Val = HIGH;
-        }
-        else {
-          Loop2Val = LOW;
-        }
-    */
     Loop2Note = Loop2[Loop2Position % Loop2Length][0];
     Loop2Duration = Loop2[Loop2Position % Loop2Length][1];
 
-    if (Loop2Note == G2_B2) {
-      if (PlayingLoop2) {
+    if (!PlayingLoop2 || Loop2Note == REST) {
+      MOS_Delay(tcb, Loop2Duration);
+    }
+    else {
+
+      if (Loop2Note == G2_B2) {
+
         digitalWrite(G2, HIGH);
         digitalWrite(B2, HIGH);
         MOS_Delay(tcb, Loop2Duration);
 
         digitalWrite(G2, LOW);
         digitalWrite(B2, LOW);
+
       }
       else {
-        MOS_Delay(tcb, Loop2Duration);
-      }
-      //digitalWrite(G2, Loop2Val);
-      //digitalWrite(B2, Loop2Val);
-
-
-      Loop2Position++;
-    }
-    else if (Loop2Note != REST) {
-      if (PlayingLoop2) {
         digitalWrite(Loop2Note, HIGH);
         MOS_Delay(tcb, Loop2Duration);
 
         digitalWrite(Loop2Note, LOW);
       }
-      else {
-        MOS_Delay(tcb, Loop2Duration);
-      }
-      //digitalWrite(Loop2Note, Loop2Val);
-
-
-      Loop2Position++;
     }
-    else {
-      MOS_Delay(tcb, Loop2Duration);
-      Loop2Position++;
-    }
-
+    Loop2Position++;
   }
 }
 
@@ -221,26 +177,19 @@ void PlayLoop3(PTCB tcb) {
     Loop3Note = Loop3[Loop3Position % Loop3Length][0];
     Loop3Duration = Loop3[Loop3Position % Loop3Length][1];
 
-    if (Loop3Note != REST) {
-      if (PlayingLoop3) {
-        digitalWrite(Loop3Note, HIGH);
-        MOS_Delay(tcb, Loop3Duration);
-
-        digitalWrite(Loop3Note, LOW);
-      }
-      else {
-        MOS_Delay(tcb, Loop3Duration);
-      }
-      //digitalWrite(Loop3Note, Loop3Val);
-
-
-      Loop3Position++;
-    }
-    else {
+    if (!PlayingLoop3 || Loop3Note == REST) {
       MOS_Delay(tcb, Loop3Duration);
-      Loop3Position++;
     }
 
+    else {
+      digitalWrite(Loop3Note, HIGH);
+      MOS_Delay(tcb, Loop3Duration);
+
+      digitalWrite(Loop3Note, LOW);
+
+    }
+
+    Loop3Position++;
   }
 }
 
@@ -250,19 +199,16 @@ void PlayLoop4(PTCB tcb) {
   while (1) {
     MOS_WaitForCond(tcb, Loop4Synced);
 
-    /*
-        if (PlayingLoop4) {
-          Loop4Val = HIGH;
-        }
-        else {
-          Loop4Val = LOW;
-        }*/
-
     Loop4Note = Loop4[Loop4Position % Loop4Length][0];
     Loop4Duration = Loop4[Loop4Position % Loop4Length][1];
 
-    if (Loop4Note == G2_B2) {
-      if (PlayingLoop4) {
+    if (!PlayingLoop4 || Loop4Note == REST) {
+      MOS_Delay(tcb, Loop4Duration);
+    }
+
+    else {
+      if (Loop4Note == G2_B2) {
+
         digitalWrite(G2, HIGH);
         digitalWrite(B2, HIGH);
 
@@ -270,37 +216,17 @@ void PlayLoop4(PTCB tcb) {
 
         digitalWrite(G2, LOW);
         digitalWrite(B2, LOW);
+
+
       }
       else {
-        MOS_Delay(tcb, Loop4Duration);
-      }
-      //digitalWrite(G2, Loop4Val);
-      //digitalWrite(B2, Loop4Val);
-
-
-
-      Loop4Position++;
-    }
-    else if (Loop4Note != REST) {
-      if (PlayingLoop4) {
         digitalWrite(Loop4Note, HIGH);
         MOS_Delay(tcb, Loop4Duration);
 
         digitalWrite(Loop4Note, LOW);
       }
-      else {
-        MOS_Delay(tcb, Loop4Duration);
-      }
-      //digitalWrite(Loop4Note, Loop4Val);
-
-
-      Loop4Position++;
     }
-    else {
-      MOS_Delay(tcb, Loop4Duration);
-      Loop4Position++;
-    }
-
+    Loop4Position++;
   }
 }
 
@@ -309,6 +235,9 @@ void PlayLoop1(PTCB tcb) {
   MOS_Continue(tcb);
 
   while (1) {
+
+    Loop1Note = Loop1[Loop1Position % Loop1Length][0];
+    Loop1Duration = Loop1[Loop1Position % Loop1Length][1];
 
     if (PlayingLoop2 && Loop1Position % 4 == 0) {
       Loop2Synced = true;
@@ -320,20 +249,15 @@ void PlayLoop1(PTCB tcb) {
       Loop4Synced = true;
     }
 
-    Loop1Note = Loop1[Loop1Position % Loop1Length][0];
-    Loop1Duration = Loop1[Loop1Position % Loop1Length][1];
+    if (!PlayingLoop1 || Loop1Note == REST) {
+      MOS_Delay(tcb, Loop1Duration);
+    }
+    else {
 
-    if (PlayingLoop1) {
       digitalWrite(Loop1Note, HIGH);
       MOS_Delay(tcb, Loop1Duration);
       digitalWrite(Loop1Note, LOW);
     }
-    else {
-      MOS_Delay(tcb, Loop1Duration);
-    }
-    //digitalWrite(Loop1Note, Loop1Val);
-    //MOS_Delay(tcb, Loop1Duration);
-    //digitalWrite(Loop1Note, LOW);
 
     Loop1Position++;
   }
