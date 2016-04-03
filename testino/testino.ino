@@ -25,7 +25,7 @@ int Loop1 [8][2] = { {E1, 500}, {B1, 500}, {E2, 500}, {B1, 500},
   {D1, 500}, {A1, 500}, {D2, 500}, {A1, 500},
 
 };
-boolean PlayingLoop1 = true; 
+boolean PlayingLoop1 = false; 
 int Loop1Length = 8;
 int Loop1Position = 0;
 int Loop1Val = HIGH;

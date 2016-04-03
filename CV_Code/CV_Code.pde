@@ -36,7 +36,7 @@ boolean inLoop4;
 
 int startMinute; 
 
-boolean finished = false;
+boolean finished = true;
 
 void setup() {
   size(1280, 480); 
@@ -175,6 +175,11 @@ void draw() {
   textSize(32);
   text(minute()-startMinute + ":" + second(), 0,0); 
   popMatrix(); 
+}
+
+
+void keyPressed() {
+  finished = false; 
 }
 
 void mousePressed() {
