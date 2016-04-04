@@ -16,8 +16,8 @@ OpenCV opencv;
 PImage src, colorFilteredImage;
 ArrayList<Contour> contours;
 
-int hue = 177;
-//int hue = 0; 
+//int hue = 177;
+int hue = 2; 
 
 // <1> Set the range of Hue values for our filter
 int rangeLow;
@@ -34,23 +34,22 @@ boolean inLoop2;
 boolean inLoop3; 
 boolean inLoop4; 
 
-int startMinute; 
-int startSecond; 
 int startTime; 
 
 boolean finished = true;
 
 void setup() {
-  size(1280, 480); 
+  //size(1280, 480);
+  size(640,480); 
   String[] cameras = Capture.list();
   //printArray(cameras); 
   //printArray(Serial.list()); 
 
   // use external webcam 
-  video = new Capture(this, 640, 480, cameras[15]);
+  //video = new Capture(this, 640, 480, cameras[15]);
 
   // use built-in webcam (testing purposes only) 
-  //video = new Capture(this, 640, 480); 
+  video = new Capture(this, 640, 480); 
 
   video.start();
 
@@ -64,18 +63,20 @@ void setup() {
 
   goldfish = new Goldfish(0, 0);
 
-  Loop1 = new Region(width/2, 0, width/4, height/2, #000000);
-  Loop2 = new Region(width*0.75, 0, width/4, height/2, #FFFFFF);
-  Loop3 = new Region(width/2, height/2, width/4, height/2, #00FF00);
-  Loop4 = new Region(width*0.75, height/2, width/4, height/2, #0000FF);
+  //Loop1 = new Region(width/2, 0, width/4, height/2, #00FFFF);
+  //Loop2 = new Region(width*0.75, 0, width/4, height/2, #FF0000);
+  //Loop3 = new Region(width/2, height/2, width/4, height/2, #00FF00);
+  //Loop4 = new Region(width*0.75, height/2, width/4, height/2, #0000FF);
+  Loop1 = new Region(0, 0, width/2, height/2, #FFFF00);
+  Loop2 = new Region(width*0.5, 0, width/2, height/2, #FF0000);
+  Loop3 = new Region(0, height/2, width/2, height/2, #00FF00);
+  Loop4 = new Region(width*0.5, height/2, width/2, height/2, #0000FF);
 
   inLoop1 = false;
   inLoop2 = false;
   inLoop3 = false;
   inLoop4 = false;
 
-  startMinute = 0;
-  startSecond = 0;
   startTime = 0;
 }
 
@@ -83,10 +84,10 @@ void draw() {
   background(255);
 
   // draw regions
-  Loop1.display();
-  Loop2.display();
-  Loop3.display();
-  Loop4.display();
+  //Loop1.display();
+  //Loop2.display();
+  //Loop3.display();
+  //Loop4.display();
 
   // Read last captured frame
   if (video.available()) {
@@ -110,6 +111,11 @@ void draw() {
 
   // Display background images
   image(src, 0, 0); 
+  
+  Loop1.display();
+  Loop2.display();
+  Loop3.display();
+  Loop4.display();
 
   if (contours.size() > 0) { 
     Contour biggestContour = contours.get(0);
@@ -128,13 +134,13 @@ void draw() {
     ellipse(ellipsePosX, ellipsePosY, 30, 30); 
 
     // TRACK GOLDFISH
-    goldfish.update(ellipsePosX + src.width, ellipsePosY);
+    //goldfish.update(ellipsePosX + src.width, ellipsePosY);
+    goldfish.update(ellipsePosX, ellipsePosY);
+    
     fill(255, 0, 0);
     ellipse(goldfish.posX, goldfish.posY, 30, 30); 
 
     if (!finished) {
-      //int currMin = abs(minute() - startMinute); 
-      //int currSec = abs(second()-startSecond);
       int currSec = (millis() - startTime) / 1000;
       int currMin = currSec / 60;  
 
@@ -190,9 +196,7 @@ void draw() {
 
 // starts toy piano
 void keyReleased() {
-  finished = false; 
-  startMinute = minute();
-  startSecond = second();
+  finished = false;  
   startTime = millis();
 }
 

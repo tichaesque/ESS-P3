@@ -20,7 +20,7 @@ class Region {
   }
   
   void display() {
-    fill(col);
+    fill(col, 125);
     rect(posX, posY, sizeX, sizeY);
   }
   
