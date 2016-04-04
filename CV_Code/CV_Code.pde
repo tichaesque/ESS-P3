@@ -67,7 +67,7 @@ void setup() {
   //Loop2 = new Region(width*0.75, 0, width/4, height/2, #FF0000);
   //Loop3 = new Region(width/2, height/2, width/4, height/2, #00FF00);
   //Loop4 = new Region(width*0.75, height/2, width/4, height/2, #0000FF);
-  Loop1 = new Region(0, 0, width/2, height/2, #FFFF00);
+  Loop1 = new Region(0, 0, width/2, height/2, #00FFFF);
   Loop2 = new Region(width*0.5, 0, width/2, height/2, #FF0000);
   Loop3 = new Region(0, height/2, width/2, height/2, #00FF00);
   Loop4 = new Region(width*0.5, height/2, width/2, height/2, #0000FF);
@@ -123,7 +123,7 @@ void draw() {
 
     noFill(); 
     strokeWeight(2); 
-    stroke(0, 255, 0);
+    stroke(#FFFFFF);
     rect(r.x, r.y, r.width, r.height);
 
     float ellipsePosX = r.x + r.width/2;
@@ -137,7 +137,7 @@ void draw() {
     //goldfish.update(ellipsePosX + src.width, ellipsePosY);
     goldfish.update(ellipsePosX, ellipsePosY);
     
-    fill(255, 0, 0);
+    fill(#FFFFFF);
     ellipse(goldfish.posX, goldfish.posY, 30, 30); 
 
     if (!finished) {
@@ -155,6 +155,7 @@ void draw() {
 
         if (!inLoop1 && Loop1.contains(goldfish.posX, goldfish.posY)) { 
           // play first loop
+          println("loop1"); 
           myPort.write('1'); 
           inLoop1 = true;
           inLoop2 = false;
@@ -162,6 +163,7 @@ void draw() {
           inLoop4 = false;
         } else if (!inLoop2 && Loop2.contains(goldfish.posX, goldfish.posY)) { 
           // play second loop
+          println("loop2"); 
           myPort.write('2'); 
           inLoop1 = false;
           inLoop2 = true;
@@ -169,6 +171,7 @@ void draw() {
           inLoop4 = false;
         } else if (!inLoop3 && Loop3.contains(goldfish.posX, goldfish.posY)) { 
           // play third loop
+          println("loop3"); 
           myPort.write('3'); 
           inLoop1 = false;
           inLoop2 = false;
@@ -176,6 +179,7 @@ void draw() {
           inLoop4 = false;
         } else if (!inLoop4 && Loop4.contains(goldfish.posX, goldfish.posY)) { 
           // play fourth loop
+          println("loop4"); 
           myPort.write('4'); 
           inLoop1 = false;
           inLoop2 = false;
