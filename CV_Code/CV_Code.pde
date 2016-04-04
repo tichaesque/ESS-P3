@@ -35,6 +35,8 @@ boolean inLoop3;
 boolean inLoop4; 
 
 int startMinute; 
+int startSecond; 
+int startTime; 
 
 boolean finished = true;
 
@@ -44,11 +46,12 @@ void setup() {
   //printArray(cameras); 
   //printArray(Serial.list()); 
 
-  // use external webcam
+  // use external webcam 
   video = new Capture(this, 640, 480, cameras[15]);
 
   // use built-in webcam (testing purposes only) 
   //video = new Capture(this, 640, 480); 
+
   video.start();
 
   myPort = new Serial(this, Serial.list()[2], 9600); 
@@ -71,11 +74,12 @@ void setup() {
   inLoop3 = false;
   inLoop4 = false;
 
-  startMinute = minute();
+  startMinute = 0;
+  startSecond = 0;
+  startTime = 0;
 }
 
 void draw() {
-
   background(255);
 
   // draw regions
@@ -83,8 +87,6 @@ void draw() {
   Loop2.display();
   Loop3.display();
   Loop4.display();
-  
-  
 
   // Read last captured frame
   if (video.available()) {
@@ -131,59 +133,71 @@ void draw() {
     ellipse(goldfish.posX, goldfish.posY, 30, 30); 
 
     if (!finished) {
-      if (!inLoop1 && Loop1.contains(goldfish.posX, goldfish.posY)) { 
-        // play toy piano
-        myPort.write('1'); 
-        inLoop1 = true;
-        inLoop2 = false;
-        inLoop3 = false;
-        inLoop4 = false;
-      } else if (!inLoop2 && Loop2.contains(goldfish.posX, goldfish.posY)) { 
-        // play toy piano
-        myPort.write('2'); 
-        inLoop1 = false;
-        inLoop2 = true;
-        inLoop3 = false;
-        inLoop4 = false;
-      } else if (!inLoop3 && Loop3.contains(goldfish.posX, goldfish.posY)) { 
-        // play toy piano
-        myPort.write('3'); 
-        inLoop1 = false;
-        inLoop2 = false;
-        inLoop3 = true;
-        inLoop4 = false;
-      } else if (!inLoop4 && Loop4.contains(goldfish.posX, goldfish.posY)) { 
-        // play toy piano
-        myPort.write('4'); 
-        inLoop1 = false;
-        inLoop2 = false;
-        inLoop3 = false;
-        inLoop4 = true;
-      }
+      //int currMin = abs(minute() - startMinute); 
+      //int currSec = abs(second()-startSecond);
+      int currSec = (millis() - startTime) / 1000;
+      int currMin = currSec / 60;  
 
-      if (minute() - startMinute >= 3 || minute() - startMinute < 0) { 
+      if (currMin >= 3) { 
+        // stop playing
         myPort.write('5'); 
 
         finished = true;
+
+        println("done");
+      } else {
+
+        if (!inLoop1 && Loop1.contains(goldfish.posX, goldfish.posY)) { 
+          // play first loop
+          myPort.write('1'); 
+          inLoop1 = true;
+          inLoop2 = false;
+          inLoop3 = false;
+          inLoop4 = false;
+        } else if (!inLoop2 && Loop2.contains(goldfish.posX, goldfish.posY)) { 
+          // play second loop
+          myPort.write('2'); 
+          inLoop1 = false;
+          inLoop2 = true;
+          inLoop3 = false;
+          inLoop4 = false;
+        } else if (!inLoop3 && Loop3.contains(goldfish.posX, goldfish.posY)) { 
+          // play third loop
+          myPort.write('3'); 
+          inLoop1 = false;
+          inLoop2 = false;
+          inLoop3 = true;
+          inLoop4 = false;
+        } else if (!inLoop4 && Loop4.contains(goldfish.posX, goldfish.posY)) { 
+          // play fourth loop
+          myPort.write('4'); 
+          inLoop1 = false;
+          inLoop2 = false;
+          inLoop3 = false;
+          inLoop4 = true;
+        }
+
+        pushMatrix();
+        translate(width*0.52, 50); 
+        fill(255);
+        textSize(60);
+        text((2-currMin) + ":" + abs(60-(currSec%60)) % 60, 0, 0); 
+        popMatrix();
       }
     }
   }
-  
-  pushMatrix();
-  translate(width*0.6, 30); 
-  fill(255);
-  textSize(32);
-  text(minute()-startMinute + ":" + second(), 0,0); 
-  popMatrix(); 
 }
 
-
-void keyPressed() {
+// starts toy piano
+void keyReleased() {
   finished = false; 
+  startMinute = minute();
+  startSecond = second();
+  startTime = millis();
 }
 
+// changes tracking color
 void mousePressed() {
-
   color c = get(mouseX, mouseY);
   println("r: " + red(c) + " g: " + green(c) + " b: " + blue(c));
 
