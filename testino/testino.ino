@@ -1,4 +1,3 @@
-
 // !! Requires Arduino-MOS scheduler library
 #include <MOS.h>
 #include <Wire.h> // Enable this line if using Arduino Uno, Mega, etc.
@@ -19,7 +18,10 @@
 #define G2_B2   1012
 #define REST    -1
 
-
+/*
+    Each loop is stored as an array of (note, duration) pairs, where
+   note is the pin corresponding to the key and duration is in milliseconds
+*/
 int Loop1 [8][2] = { {E1, 500}, {NOTE_B1, 500}, {E2, 500}, {NOTE_B1, 500},
   {D1, 500}, {A1, 500}, {D2, 500}, {A1, 500},
 
@@ -81,6 +83,11 @@ void loop () {
 
 }
 
+/*
+   SerialListener parses commands issued by the Processing program
+   through the serial port and triggers/disables loops based on
+   the byte value that was just read
+*/
 void SerialListener(PTCB tcb) {
   MOS_Continue(tcb);                    // Continue at previous suspended position
 
@@ -129,30 +136,51 @@ void SerialListener(PTCB tcb) {
   }
 }
 
+void PlayLoop1(PTCB tcb) {
+  MOS_Continue(tcb);
+
+  while (1) {
+    Loop1Note = Loop1[Loop1Position % Loop1Length][0];
+    Loop1Duration = Loop1[Loop1Position % Loop1Length][1];
+
+    // The track is 'muted' if the loop is currently disabled or playing a rest note
+    if (!PlayingLoop1 || Loop1Note == REST) {
+      MOS_Delay(tcb, Loop1Duration);
+    }
+    
+    else {
+      digitalWrite(Loop1Note, HIGH);
+      MOS_Delay(tcb, Loop1Duration);
+      digitalWrite(Loop1Note, LOW);
+    }
+
+    Loop1Position++;
+  }
+}
+
 void PlayLoop2(PTCB tcb) {
   MOS_Continue(tcb);                    // Continue at previous suspended position
 
   while (1) {
-    //MOS_WaitForCond(tcb, Loop2Synced);
-
     Loop2Note = Loop2[Loop2Position % Loop2Length][0];
     Loop2Duration = Loop2[Loop2Position % Loop2Length][1];
 
+    // The track is 'muted' if the loop is currently disabled or playing a rest note
     if (!PlayingLoop2 || Loop2Note == REST) {
       MOS_Delay(tcb, Loop2Duration);
     }
+    
     else {
 
       if (Loop2Note == G2_B2) {
-
         digitalWrite(G2, HIGH);
         digitalWrite(B2, HIGH);
         MOS_Delay(tcb, Loop2Duration);
 
         digitalWrite(G2, LOW);
         digitalWrite(B2, LOW);
-
       }
+      
       else {
         digitalWrite(Loop2Note, HIGH);
         MOS_Delay(tcb, Loop2Duration);
@@ -168,11 +196,10 @@ void PlayLoop3(PTCB tcb) {
   MOS_Continue(tcb);                    // Continue at previous suspended position
 
   while (1) {
-    //MOS_WaitForCond(tcb, Loop3Synced);
-
     Loop3Note = Loop3[Loop3Position % Loop3Length][0];
     Loop3Duration = Loop3[Loop3Position % Loop3Length][1];
 
+    // The track is 'muted' if the loop is currently disabled or playing a rest note
     if (!PlayingLoop3 || Loop3Note == REST) {
       MOS_Delay(tcb, Loop3Duration);
     }
@@ -193,18 +220,16 @@ void PlayLoop4(PTCB tcb) {
   MOS_Continue(tcb);                    // Continue at previous suspended position
 
   while (1) {
-    //MOS_WaitForCond(tcb, Loop4Synced);
-
     Loop4Note = Loop4[Loop4Position % Loop4Length][0];
     Loop4Duration = Loop4[Loop4Position % Loop4Length][1];
 
+    // The track is 'muted' if the loop is currently disabled or playing a rest note
     if (!PlayingLoop4 || Loop4Note == REST) {
       MOS_Delay(tcb, Loop4Duration);
     }
 
     else {
       if (Loop4Note == G2_B2) {
-
         digitalWrite(G2, HIGH);
         digitalWrite(B2, HIGH);
 
@@ -212,9 +237,8 @@ void PlayLoop4(PTCB tcb) {
 
         digitalWrite(G2, LOW);
         digitalWrite(B2, LOW);
-
-
       }
+      
       else {
         digitalWrite(Loop4Note, HIGH);
         MOS_Delay(tcb, Loop4Duration);
@@ -225,30 +249,5 @@ void PlayLoop4(PTCB tcb) {
     Loop4Position++;
   }
 }
-
-// Special loop that also serves as a metronome
-void PlayLoop1(PTCB tcb) {
-  MOS_Continue(tcb);
-
-  while (1) {
-
-    Loop1Note = Loop1[Loop1Position % Loop1Length][0];
-    Loop1Duration = Loop1[Loop1Position % Loop1Length][1];
-
-    if (!PlayingLoop1 || Loop1Note == REST) {
-      MOS_Delay(tcb, Loop1Duration);
-    }
-    else {
-
-      digitalWrite(Loop1Note, HIGH);
-      MOS_Delay(tcb, Loop1Duration);
-      digitalWrite(Loop1Note, LOW);
-    }
-
-    Loop1Position++;
-  }
-}
-
-
 
 

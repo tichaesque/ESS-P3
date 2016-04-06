@@ -1,9 +1,14 @@
 class Region {
   
+  // size of the region
   float sizeX;
   float sizeY;
+  
+  // position of the region
   float posX;
   float posY; 
+  
+  // color of the region (for display)
   color col; 
   
   Region(float posX_, float posY_, float sizeX_, float sizeY_, color col_) {
